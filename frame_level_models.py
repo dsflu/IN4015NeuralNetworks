@@ -44,6 +44,8 @@ flags.DEFINE_string("video_level_classifier_model", "MoeModel",
                     "Some Frame-Level models can be decomposed into a "
                     "generalized pooling operation followed by a "
                     "classifier layer")
+flags.DEFINE_integer("lstm_cells", 1024, "Number of LSTM cells.")
+flags.DEFINE_integer("lstm_layers", 2, "Number of LSTM layers.")
 
 class FrameLevelLogisticModel(models.BaseModel):
 
@@ -77,10 +79,10 @@ class FrameLevelLogisticModel(models.BaseModel):
 
     output = slim.fully_connected(
         avg_pooled, vocab_size, activation_fn=tf.nn.sigmoid,
-        weights_regularizer=slim.l2_regularizer(0.01))
+        weights_regularizer=slim.l2_regularizer(1e-8))
     return {"predictions": output}
 
-class DBoFModel(models.BaseModel):
+class DbofModel(models.BaseModel):
   """Creates a Deep Bag of Frames model.
 
   The model projects the features for each frame into a higher dimensional
@@ -140,9 +142,9 @@ class DBoFModel(models.BaseModel):
           is_training=is_training,
           scope="input_bn")
 
-    cluster_weights = tf.Variable(tf.random_normal(
-        [feature_size, cluster_size],
-        stddev=1 / math.sqrt(feature_size)))
+    cluster_weights = tf.get_variable("cluster_weights",
+      [feature_size, cluster_size],
+      initializer = tf.random_normal_initializer(stddev=1 / math.sqrt(feature_size)))
     tf.summary.histogram("cluster_weights", cluster_weights)
     activation = tf.matmul(reshaped_input, cluster_weights)
     if add_batch_norm:
@@ -153,9 +155,9 @@ class DBoFModel(models.BaseModel):
           is_training=is_training,
           scope="cluster_bn")
     else:
-      cluster_biases = tf.Variable(
-          tf.random_normal(
-              [cluster_size], stddev=1 / math.sqrt(feature_size)))
+      cluster_biases = tf.get_variable("cluster_biases",
+        [cluster_size],
+        initializer = tf.random_normal(stddev=1 / math.sqrt(feature_size)))
       tf.summary.histogram("cluster_biases", cluster_biases)
       activation += cluster_biases
     activation = tf.nn.relu6(activation)
@@ -164,9 +166,9 @@ class DBoFModel(models.BaseModel):
     activation = tf.reshape(activation, [-1, max_frames, cluster_size])
     activation = utils.FramePooling(activation, FLAGS.dbof_pooling_method)
 
-    hidden1_weights = tf.Variable(tf.random_normal(
-        [cluster_size, hidden1_size],
-        stddev=1 / math.sqrt(cluster_size)))
+    hidden1_weights = tf.get_variable("hidden1_weights",
+      [cluster_size, hidden1_size],
+      initializer=tf.random_normal_initializer(stddev=1 / math.sqrt(cluster_size)))
     tf.summary.histogram("hidden1_weights", hidden1_weights)
     activation = tf.matmul(activation, hidden1_weights)
     if add_batch_norm:
@@ -177,9 +179,9 @@ class DBoFModel(models.BaseModel):
           is_training=is_training,
           scope="hidden1_bn")
     else:
-      hidden1_biases = tf.Variable(
-          tf.random_normal(
-              [hidden1_size], stddev=0.01))
+      hidden1_biases = tf.get_variable("hidden1_biases",
+        [hidden1_size],
+        initializer = tf.random_normal_initializer(stddev=0.01))
       tf.summary.histogram("hidden1_biases", hidden1_biases)
       activation += hidden1_biases
     activation = tf.nn.relu6(activation)
@@ -189,5 +191,46 @@ class DBoFModel(models.BaseModel):
                                FLAGS.video_level_classifier_model)
     return aggregated_model().create_model(
         model_input=activation,
+        vocab_size=vocab_size,
+        **unused_params)
+
+class LstmModel(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, num_frames, **unused_params):
+    """Creates a model which uses a stack of LSTMs to represent the video.
+
+    Args:
+      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
+                   input features.
+      vocab_size: The number of classes in the dataset.
+      num_frames: A vector of length 'batch' which indicates the number of
+           frames for each video (before padding).
+
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are
+      'batch_size' x 'num_classes'.
+    """
+    lstm_size = FLAGS.lstm_cells
+    number_of_layers = FLAGS.lstm_layers
+
+    stacked_lstm = tf.contrib.rnn.MultiRNNCell(
+            [
+                tf.contrib.rnn.BasicLSTMCell(
+                    lstm_size, forget_bias=1.0)
+                for _ in range(number_of_layers)
+                ])
+
+    loss = 0.0
+
+    outputs, state = tf.nn.dynamic_rnn(stacked_lstm, model_input,
+                                       sequence_length=num_frames,
+                                       dtype=tf.float32)
+
+    aggregated_model = getattr(video_level_models,
+                               FLAGS.video_level_classifier_model)
+
+    return aggregated_model().create_model(
+        model_input=state[-1].h,
         vocab_size=vocab_size,
         **unused_params)

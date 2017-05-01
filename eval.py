@@ -103,13 +103,14 @@ def get_input_evaluation_tensors(reader,
     filename_queue = tf.train.string_input_producer(
         files, shuffle=False, num_epochs=1)
     eval_data = [
-        reader.prepare_reader(filename_queue) for _ in xrange(num_readers)
+        reader.prepare_reader(filename_queue) for _ in range(num_readers)
     ]
     return tf.train.batch_join(
         eval_data,
         batch_size=batch_size,
         capacity=3 * batch_size,
-        allow_smaller_final_batch=True)
+        allow_smaller_final_batch=True,
+        enqueue_many=True)
 
 
 def build_graph(reader,
@@ -144,7 +145,7 @@ def build_graph(reader,
   # Normalize input features.
   model_input = tf.nn.l2_normalize(model_input_raw, feature_dim)
 
-  with tf.name_scope("model"):
+  with tf.variable_scope("tower"):
     result = model.create_model(model_input,
                                 num_frames=num_frames,
                                 vocab_size=reader.num_classes,
