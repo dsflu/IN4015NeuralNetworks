@@ -1,0 +1,10 @@
+gcloud ml-engine local train \
+--package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train -- \
+--train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/test/train-0.tfrecord' \
+--train_dir=/tmp/yt8m_train --model=CNNModel --start_new_model
+
+
+
+
+MODEL_DIR=/tmp/yt8m
+python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/test/train-0.tfrecord' --model=CNNModel --train_dir=$MODEL_DIR/video_level_logistic_model

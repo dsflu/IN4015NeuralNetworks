@@ -102,35 +102,68 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
-class VGG16(models.BaseModel)
+class VGG16(models.BaseModel):
   def create_model(self, model_input, vocab_size, l2_penalty=1e-8, **unused_params):
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
                       activation_fn=tf.nn.relu,
                       weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                       weights_regularizer=slim.l2_regularizer(0.0005)):
-    net = slim.repeat(model_input, 2, slim.conv2d, 64, [3, 3], scope='conv1')
-    net = slim.max_pool2d(net, [2, 2], scope='pool1')
-    net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
-    net = slim.max_pool2d(net, [2, 2], scope='pool2')
-    net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
-    net = slim.max_pool2d(net, [2, 2], scope='pool3')
-    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
-    net = slim.max_pool2d(net, [2, 2], scope='pool4')
-    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
-    net = slim.max_pool2d(net, [2, 2], scope='pool5')
-    net = slim.fully_connected(net, 4096, scope='fc6')
-    net = slim.dropout(net, 0.5, scope='dropout6')
-    net = slim.fully_connected(net, 4096, scope='fc7')
-    net = slim.dropout(net, 0.5, scope='dropout7')
-    net = slim.fully_connected(net, vocab_size, activation_fn=None, scope='fc8')
-    return {"predictions": net}
+	    net = slim.repeat(model_input, 2, slim.conv2d, 64, [3, 3], scope='conv1')
+	    net = slim.max_pool2d(net, [2, 2], scope='pool1')
+	    net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
+	    net = slim.max_pool2d(net, [2, 2], scope='pool2')
+	    net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
+	    net = slim.max_pool2d(net, [2, 2], scope='pool3')
+	    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
+	    net = slim.max_pool2d(net, [2, 2], scope='pool4')
+	    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
+	    net = slim.max_pool2d(net, [2, 2], scope='pool5')
+	    net = slim.fully_connected(net, 4096, scope='fc6')
+	    net = slim.dropout(net, 0.5, scope='dropout6')
+	    net = slim.fully_connected(net, 4096, scope='fc7')
+	    net = slim.dropout(net, 0.5, scope='dropout7')
+	    net = slim.fully_connected(net, vocab_size, activation_fn=tf.nn.sigmoid, scope='fc8')
+	    return {"predictions": net}
+
+class RnnModel(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+    """Creates a model which uses a stack of LSTMs to represent the video.
+    Args:
+      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
+                   input features.
+      vocab_size: The number of classes in the dataset.
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are
+      'batch_size' x 'num_classes'.
+    """
+    lstm_size = 1024
+    number_of_layers = 2
+
+    stacked_lstm = tf.contrib.rnn.MultiRNNCell(
+            [
+                tf.contrib.rnn.BasicLSTMCell(
+                    lstm_size, forget_bias=1.0)
+                for _ in range(number_of_layers)
+                ])
+
+    loss = 0.0
+
+    model_input = tf.expand_dims(model_input,axis=1)
+
+    outputs, state = tf.nn.dynamic_rnn(stacked_lstm, model_input,
+                                       sequence_length=tf.ones([1]),
+                                       dtype=tf.float32)
+
+    return {"predictions": outputs}
 
 class CNNModel(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, l2_penalty=1e-8, **unused_params):
 
     # Input Layer
-    input_layer = tf.reshape(model_input, [-1, 32, 32, 3])
+    input_layer = tf.reshape(model_input, [-1, 1024, 1024, 1])
 
 
     # Convolutional Layer #1
@@ -177,18 +210,19 @@ class CNNModel(models.BaseModel):
 
     pool3 = tf.layers.max_pooling2d(inputs=conv5, pool_size=[2, 2], strides=2)
 
-    pool3_flat = tf.reshape(pool3, [-1, 7 * 7 * 64])
+    pool3_flat = tf.reshape(pool3, [-1, 524288])
     dense = tf.layers.dense(inputs=pool3_flat, units=4096, activation=tf.nn.relu)
     dropout = tf.layers.dropout(
-      inputs=dense, rate=0.4, training=mode == learn.ModeKeys.TRAIN)
+      inputs=dense, rate=0.4)
     dense2 = tf.layers.dense(inputs=dropout, units=2048, activation=tf.nn.relu)
     dropout2 = tf.layers.dropout(
-      inputs=dense2, rate=0.4, training=mode == learn.ModeKeys.TRAIN)
+      inputs=dense2, rate=0.4)
 
-    logits = tf.layers.dense(inputs=dropout2, units=10)
+    # logits = tf.layers.dense(inputs=dropout2, units=10)
 
 
-    # output = slim.fully_connected(
-    #     model_input, vocab_size, activation_fn=tf.nn.sigmoid,
-    #     weights_regularizer=slim.l2_regularizer(l2_penalty))
-    return {"predictions": logits}
+    output = slim.fully_connected(
+        dropout2, vocab_size, activation_fn=tf.nn.sigmoid,
+        weights_regularizer=slim.l2_regularizer(l2_penalty))
+    return {"predictions": output}
+
