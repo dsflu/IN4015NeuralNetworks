@@ -158,12 +158,31 @@ class RnnModel(models.BaseModel):
 
     return {"predictions": outputs}
 
+class CNNModel2(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+      
+    
+    input_layer = tf.reshape(model_input, [-1,32,32,1])
+    
+    
+    net = slim.conv2d(input_layer, 10, [3, 3])
+
+    
+    net = slim.max_pool2d(net, [32,32], [32,32], padding="same")   
+
+    output = slim.fully_connected(
+    net, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
+    return {"predictions": output}
+
 class CNNModel(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, l2_penalty=1e-8, **unused_params):
 
     # Input Layer
-    input_layer = tf.reshape(model_input, [-1, 1024, 1024, 1])
+    input_layer = tf.reshape(model_input, [-1, 32, 32, 1])
 
 
     # Convolutional Layer #1
