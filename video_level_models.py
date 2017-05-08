@@ -103,28 +103,31 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
-class VGG16(models.BaseModel):
-  def create_model(self, model_input, vocab_size, l2_penalty=1e-8, **unused_params):
-    with slim.arg_scope([slim.conv2d, slim.fully_connected],
-                      activation_fn=tf.nn.relu,
-                      weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
-                      weights_regularizer=slim.l2_regularizer(0.0005)):
-	    net = slim.repeat(model_input, 2, slim.conv2d, 64, [3, 3], scope='conv1')
-	    net = slim.max_pool2d(net, [2, 2], scope='pool1')
-	    net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
-	    net = slim.max_pool2d(net, [2, 2], scope='pool2')
-	    net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
-	    net = slim.max_pool2d(net, [2, 2], scope='pool3')
-	    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
-	    net = slim.max_pool2d(net, [2, 2], scope='pool4')
-	    net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
-	    net = slim.max_pool2d(net, [2, 2], scope='pool5')
-	    net = slim.fully_connected(net, 4096, scope='fc6')
-	    net = slim.dropout(net, 0.5, scope='dropout6')
-	    net = slim.fully_connected(net, 4096, scope='fc7')
-	    net = slim.dropout(net, 0.5, scope='dropout7')
-	    net = slim.fully_connected(net, vocab_size, activation_fn=tf.nn.sigmoid, scope='fc8')
-	    return {"predictions": net}
+class MLP(models.BaseModel):
+  def create_model(self, model_input, vocab_size, **unused_params):
+    n_hidden_1 = 1024 # 1st layer number of features
+    n_hidden_2 = 1024 # 2nd layer number of features
+    n_input = 1024 # MNIST data input (img shape: 28*28)
+    n_classes = vocab_size # MNIST total classes (0-9 digits)
+    weights = {
+        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+    }
+    biases = {
+        'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+        'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_classes]))
+    }
+
+    layer_1 = tf.add(tf.matmul(model_input, weights['h1']), biases['b1'])
+    layer_1 = tf.nn.relu(layer_1)
+    
+    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    layer_2 = tf.nn.relu(layer_2)
+    
+    out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
+    return {"predictions": out_layer}
 
 class RnnModel(models.BaseModel):
 

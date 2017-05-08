@@ -7,7 +7,7 @@ gcloud ml-engine local train \
 
 
 MODEL_DIR=/tmp/yt8m
-python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=CNNModel2 --train_dir=$MODEL_DIR/video_level_logistic_model
+python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=MLP --train_dir=$MODEL_DIR/video_level_logistic_model
 
 
 
