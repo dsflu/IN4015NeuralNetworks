@@ -131,7 +131,7 @@ def validate_class_name(flag_value, category, modules, expected_superclass):
 
 def get_input_data_tensors(reader,
                            data_pattern,
-                           batch_size=1000,
+                           batch_size=100,
                            num_epochs=None,
                            num_readers=1):
   """Creates the section of the graph which reads the training data.

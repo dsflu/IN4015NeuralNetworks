@@ -1,22 +1,28 @@
 gcloud ml-engine local train \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train -- \
---train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/test/train-0.tfrecord' \
+--train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' \
 --train_dir=/tmp/yt8m_train --model=CNNModel2 --start_new_model
 
 
 
 
 MODEL_DIR=/tmp/yt8m
-python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/test/train-0.tfrecord' --model=CNNModel2 --train_dir=$MODEL_DIR/video_level_logistic_model
+python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=CNNModel2 --train_dir=$MODEL_DIR/video_level_logistic_model
 
 
 
+
+BUCKET_NAME=gs://${USER}_yt8m_train_bucket
+gsutil mb -l us-east1 $BUCKET_NAME
 
 JOB_NAME=yt8m_train_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=youtube-8m/cloudml-gpu.yaml \
--- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
+-- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train[0-9].tfrecord' \
 --model=CNNModel \
 --train_dir=$BUCKET_NAME/yt8m_train_video_level_cnn
+
+tensorboard --logdir=$BUCKET_NAME --port=8080
+sdf
