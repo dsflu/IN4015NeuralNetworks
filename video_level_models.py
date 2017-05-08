@@ -44,6 +44,7 @@ class LogisticModel(models.BaseModel):
     output = slim.fully_connected(
         model_input, vocab_size, activation_fn=tf.nn.sigmoid,
         weights_regularizer=slim.l2_regularizer(0.01))
+    print output.get_shape()[1]
     return {"predictions": output}
 
 class MoeModel(models.BaseModel):
@@ -161,6 +162,8 @@ class RnnModel(models.BaseModel):
 class CNNModel2(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, **unused_params):
+    print model_input.get_shape()[1]
+    print vocab_size
       
     
     input_layer = tf.reshape(model_input, [-1,32,32,1])
@@ -174,6 +177,9 @@ class CNNModel2(models.BaseModel):
     output = slim.fully_connected(
     net, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
+
+    print output.get_shape()[0]
+    print output.get_shape()[1]
 
     return {"predictions": output}
 
@@ -243,5 +249,6 @@ class CNNModel(models.BaseModel):
     output = slim.fully_connected(
         dropout2, vocab_size, activation_fn=tf.nn.sigmoid,
         weights_regularizer=slim.l2_regularizer(l2_penalty))
+    print output.get_shape()[1]
     return {"predictions": output}
 
