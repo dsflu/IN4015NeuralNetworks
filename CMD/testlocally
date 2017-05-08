@@ -25,3 +25,4 @@ submit training $JOB_NAME \
 --train_dir=$BUCKET_NAME/yt8m_train_video_level_cnn
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
+sdf
