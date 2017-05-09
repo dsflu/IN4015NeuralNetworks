@@ -44,7 +44,7 @@ class LogisticModel(models.BaseModel):
     output = slim.fully_connected(
         model_input, vocab_size, activation_fn=tf.nn.sigmoid,
         weights_regularizer=slim.l2_regularizer(0.01))
-    print output.get_shape()[1]
+    # print output.get_shape()[1]
     return {"predictions": output}
 
 class MoeModel(models.BaseModel):
@@ -105,7 +105,7 @@ class MoeModel(models.BaseModel):
 
 class MLP(models.BaseModel):
   def create_model(self, model_input, vocab_size, **unused_params):
-    x = slim.fully_connected(model_input, 32,activation_fn=tf.nn.sigmoid)
+    x = slim.fully_connected(model_input, 1024,activation_fn=None)
    
 
     output = slim.fully_connected(
@@ -113,38 +113,6 @@ class MLP(models.BaseModel):
         weights_regularizer=slim.l2_regularizer(0.01))
     return {"predictions": output}
 
-class RnnModel(models.BaseModel):
-
-  def create_model(self, model_input, vocab_size, **unused_params):
-    """Creates a model which uses a stack of LSTMs to represent the video.
-    Args:
-      model_input: A 'batch_size' x 'max_frames' x 'num_features' matrix of
-                   input features.
-      vocab_size: The number of classes in the dataset.
-    Returns:
-      A dictionary with a tensor containing the probability predictions of the
-      model in the 'predictions' key. The dimensions of the tensor are
-      'batch_size' x 'num_classes'.
-    """
-    lstm_size = 1024
-    number_of_layers = 2
-
-    stacked_lstm = tf.contrib.rnn.MultiRNNCell(
-            [
-                tf.contrib.rnn.BasicLSTMCell(
-                    lstm_size, forget_bias=1.0)
-                for _ in range(number_of_layers)
-                ])
-
-    loss = 0.0
-
-    model_input = tf.expand_dims(model_input,axis=1)
-
-    outputs, state = tf.nn.dynamic_rnn(stacked_lstm, model_input,
-                                       sequence_length=tf.ones([1]),
-                                       dtype=tf.float32)
-
-    return {"predictions": outputs}
 
 class CNNModel2(models.BaseModel):
 

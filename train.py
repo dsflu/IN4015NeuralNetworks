@@ -131,7 +131,7 @@ def validate_class_name(flag_value, category, modules, expected_superclass):
 
 def get_input_data_tensors(reader,
                            data_pattern,
-                           batch_size=100,
+                           batch_size=1000,
                            num_epochs=None,
                            num_readers=1):
   """Creates the section of the graph which reads the training data.
@@ -182,7 +182,7 @@ def find_class_by_name(name, modules):
 def build_graph(reader,
                 model,
                 train_data_pattern,
-                label_loss_fn=losses.MSELoss(),
+                label_loss_fn=losses.MAELoss(),
                 batch_size=1000,
                 base_learning_rate=0.01,
                 learning_rate_decay_examples=1000000,
