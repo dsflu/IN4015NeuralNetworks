@@ -105,29 +105,13 @@ class MoeModel(models.BaseModel):
 
 class MLP(models.BaseModel):
   def create_model(self, model_input, vocab_size, **unused_params):
-    n_hidden_1 = 1024 # 1st layer number of features
-    n_hidden_2 = 1024 # 2nd layer number of features
-    n_input = 1024 # MNIST data input (img shape: 28*28)
-    n_classes = vocab_size # MNIST total classes (0-9 digits)
-    weights = {
-        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
-    }
-    biases = {
-        'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-        'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-        'out': tf.Variable(tf.random_normal([n_classes]))
-    }
+    x = slim.fully_connected(model_input, 32,activation_fn=tf.nn.sigmoid)
+   
 
-    layer_1 = tf.add(tf.matmul(model_input, weights['h1']), biases['b1'])
-    layer_1 = tf.nn.relu(layer_1)
-    
-    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
-    layer_2 = tf.nn.relu(layer_2)
-    
-    out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
-    return {"predictions": out_layer}
+    output = slim.fully_connected(
+        x, vocab_size, activation_fn=tf.nn.sigmoid,
+        weights_regularizer=slim.l2_regularizer(0.01))
+    return {"predictions": output}
 
 class RnnModel(models.BaseModel):
 
