@@ -103,14 +103,17 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
-class MLP(models.BaseModel):
+
+class MLPModel(models.BaseModel):
+
   def create_model(self, model_input, vocab_size, **unused_params):
-    x = slim.fully_connected(model_input, 1024,activation_fn=None)
-   
+      
+    net = slim.fully_connected(model_input,128)
 
     output = slim.fully_connected(
-        x, vocab_size, activation_fn=tf.nn.sigmoid,
-        weights_regularizer=slim.l2_regularizer(0.01))
+    net, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
     return {"predictions": output}
 
 

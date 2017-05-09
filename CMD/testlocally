@@ -27,7 +27,7 @@ submit training $JOB_NAME \
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
 
-JOB_TO_EVAL=yt8m_train_video_level_mse_Logistic
+JOB_TO_EVAL=yt8m_train_video_level_mae_Logistic
 JOB_NAME=yt8m_inference_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
 --package-path=yIN4015NeuralNetworks --module-name=IN4015NeuralNetworks.inference \
