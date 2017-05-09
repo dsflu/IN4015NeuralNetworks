@@ -109,9 +109,11 @@ class MLPModel(models.BaseModel):
   def create_model(self, model_input, vocab_size, **unused_params):
       
     net = slim.fully_connected(model_input,128)
+    dropout = tf.layers.dropout(
+      inputs=net, rate=0.4)
 
     output = slim.fully_connected(
-    net, vocab_size, activation_fn=tf.nn.sigmoid,
+    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
 
     return {"predictions": output}
