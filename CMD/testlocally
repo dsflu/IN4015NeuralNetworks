@@ -7,7 +7,7 @@ gcloud ml-engine local train \
 
 
 MODEL_DIR=/tmp/yt8m
-python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=LogisticModel --train_dir=$MODEL_DIR/video_level_mae
+python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=MLPModel --train_dir=$MODEL_DIR/mlp
 
 
 
@@ -21,16 +21,17 @@ submit training $JOB_NAME \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
---model=LogisticModel \
---train_dir=$BUCKET_NAME/MLPModel
+--feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
+--model=MLPModel \
+--train_dir=$BUCKET_NAME/MLPModel_512
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
 
-JOB_TO_EVAL=yt8m_train_video_level_mae_Logistic
+JOB_TO_EVAL=MLPModel
 JOB_NAME=yt8m_inference_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
---package-path=yIN4015NeuralNetworks --module-name=IN4015NeuralNetworks.inference \
+--package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.inference \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --input_data_pattern='gs://youtube8m-ml/1/video_level/test/test*.tfrecord' \
