@@ -13,7 +13,7 @@ python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetwor
 
 
 
-BUCKET_NAME=gs://${USER}_delftblue_bucket
+BUCKET_NAME=gs://${USER}_mlp_bucket
 gsutil mb -l us-east1 $BUCKET_NAME
 
 JOB_NAME=delftblue_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
