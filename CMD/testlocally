@@ -1,6 +1,7 @@
 gcloud ml-engine local train \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train -- \
 --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' \
+--feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --train_dir=/tmp/yt8m_train --model=LogisticModel --start_new_model
 
 
@@ -12,10 +13,10 @@ python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetwor
 
 
 
-BUCKET_NAME=gs://${USER}_yt8m_train_bucket
+BUCKET_NAME=gs://${USER}_delftblue_bucket
 gsutil mb -l us-east1 $BUCKET_NAME
 
-JOB_NAME=yt8m_train_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
+JOB_NAME=delftblue_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
@@ -23,7 +24,7 @@ submit training $JOB_NAME \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --model=MLPModel \
---train_dir=$BUCKET_NAME/MLPModel_512
+--train_dir=$BUCKET_NAME/MLPModel_1024
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
