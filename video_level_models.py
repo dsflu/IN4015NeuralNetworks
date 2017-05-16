@@ -103,41 +103,12 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
-class MLPModel2(models.BaseModel):
+class MLPModel3Layers(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, **unused_params):
       
-    net = slim.fully_connected(model_input,512)
-    net = slim.fully_connected(net,4096)
-    dropout = tf.layers.dropout(
-      inputs=net, rate=0.2)
-
-    output = slim.fully_connected(
-    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
-    weights_regularizer=slim.l2_regularizer(0.01))
-
-    return {"predictions": output}
-
-class MLPModel4(models.BaseModel):
-
-  def create_model(self, model_input, vocab_size, **unused_params):
-      
-    net = slim.fully_connected(model_input,512)
-    net = slim.fully_connected(net,4096)
-    dropout = tf.layers.dropout(
-      inputs=net, rate=0.4)
-
-    output = slim.fully_connected(
-    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
-    weights_regularizer=slim.l2_regularizer(0.01))
-
-    return {"predictions": output}
-
-class MLPModel5(models.BaseModel):
-
-  def create_model(self, model_input, vocab_size, **unused_params):
-      
-    net = slim.fully_connected(model_input,512)
+    net = slim.fully_connected(model_input,1024)
+    net = slim.fully_connected(model_input,2048)
     net = slim.fully_connected(net,4096)
     dropout = tf.layers.dropout(
       inputs=net, rate=0.5)
@@ -148,20 +119,7 @@ class MLPModel5(models.BaseModel):
 
     return {"predictions": output}
 
-class MLPModel7(models.BaseModel):
 
-  def create_model(self, model_input, vocab_size, **unused_params):
-      
-    net = slim.fully_connected(model_input,512)
-    net = slim.fully_connected(net,4096)
-    dropout = tf.layers.dropout(
-      inputs=net, rate=0.7)
-
-    output = slim.fully_connected(
-    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
-    weights_regularizer=slim.l2_regularizer(0.01))
-
-    return {"predictions": output}
 
 
 class CNNModel2(models.BaseModel):
