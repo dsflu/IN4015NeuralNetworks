@@ -23,13 +23,13 @@ submit training $JOB_NAME \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
---model=MLPModel7 \
---train_dir=$BUCKET_NAME/MLPModel_2layers_dropout_0.7
+--model=MLPModel3Layers \
+--train_dir=$BUCKET_NAME/MLPModel3Layers_withsigmoid
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
 
-JOB_TO_EVAL=MLPModel_2layers
+JOB_TO_EVAL=MLPModel_MLPModel3Layers_dropout_0.5
 JOB_NAME=yt8m_inference_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.inference \
@@ -38,4 +38,4 @@ submit training $JOB_NAME \
 -- --input_data_pattern='gs://youtube8m-ml/1/video_level/test/test*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --train_dir=$BUCKET_NAME/${JOB_TO_EVAL} \
---output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions_2layers.csv
+--output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions_3layers.csv

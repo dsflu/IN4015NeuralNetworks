@@ -107,11 +107,11 @@ class MLPModel3Layers(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, **unused_params):
       
-    net = slim.fully_connected(model_input,1024)
-    net = slim.fully_connected(model_input,2048)
-    net = slim.fully_connected(net,4096)
+    net = slim.fully_connected(model_input,1024,activation_fn=tf.nn.sigmoid)
+    net = slim.fully_connected(model_input,2048,activation_fn=tf.nn.sigmoid)
+    net = slim.fully_connected(net,4096,activation_fn=tf.nn.sigmoid)
     dropout = tf.layers.dropout(
-      inputs=net, rate=0.5)
+      inputs=net, rate=0.4)
 
     output = slim.fully_connected(
     dropout, vocab_size, activation_fn=tf.nn.sigmoid,
