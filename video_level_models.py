@@ -22,6 +22,7 @@ import utils
 from tensorflow import flags
 import tensorflow.contrib.slim as slim
 
+
 FLAGS = flags.FLAGS
 flags.DEFINE_integer(
     "moe_num_mixtures", 2,
@@ -123,15 +124,20 @@ class MLPModeltest(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, **unused_params):
       
-    network = tl.layers.InputLayer(model_input, name='input_layer')
-    network = tl.layers.DropoutLayer(network, keep=0.8, name='drop1')
-    network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu1')
-    network = tl.layers.DropoutLayer(network, keep=0.5, name='drop2')
-    network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu2')
-    network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
+    # network = tl.layers.InputLayer(model_input, name='input_layer')
+    # network = tl.layers.DropoutLayer(network, keep=0.8, name='drop1')
+    # network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu1')
+    # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop2')
+    # network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu2')
+    # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
+    net =  tf.layers.dropout(model_input,rate=0.2)
+    net = tf.layers.dense(net, 1024, activation = tf.nn.relu, name='relu1')
+    net =  tf.layers.dropout(net,rate=0.5)
+    net = tf.layers.dense(net, 1024, activation = tf.nn.relu, name='relu2')
+    net =  tf.layers.dropout(net,rate=0.5)
 
     output = slim.fully_connected(
-    network, vocab_size, activation_fn=tf.nn.sigmoid,
+    net, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
 
     return {"predictions": output}

@@ -8,7 +8,7 @@ gcloud ml-engine local train \
 
 
 MODEL_DIR=/tmp/yt8m
-python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=MLPModel --train_dir=$MODEL_DIR/mlp
+python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=MLPModeltest --train_dir=$MODEL_DIR/mlp
 
 
 BUCKET_NAME=gs://${USER}_delftblue_bucket
