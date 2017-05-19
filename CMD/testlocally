@@ -23,8 +23,8 @@ submit training $JOB_NAME \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
---model=MLPModel3Layers \
---train_dir=$BUCKET_NAME/MLPModel3Layers_withsigmoid
+--model=MLPModeltest \
+--train_dir=$BUCKET_NAME/MLPModel_test
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 

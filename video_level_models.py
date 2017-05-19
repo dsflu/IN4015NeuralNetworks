@@ -119,6 +119,23 @@ class MLPModel3Layers(models.BaseModel):
 
     return {"predictions": output}
 
+class MLPModeltest(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+      
+    network = tl.layers.InputLayer(model_input, name='input_layer')
+    network = tl.layers.DropoutLayer(network, keep=0.8, name='drop1')
+    network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu1')
+    network = tl.layers.DropoutLayer(network, keep=0.5, name='drop2')
+    network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu2')
+    network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
+
+    output = slim.fully_connected(
+    network, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
+    return {"predictions": output}
+
 
 
 
