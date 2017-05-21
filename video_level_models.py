@@ -104,6 +104,7 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
+
 class MLPModel3Layers(models.BaseModel):
 
   def create_model(self, model_input, vocab_size, **unused_params):
@@ -130,14 +131,12 @@ class MLPModeltest(models.BaseModel):
     # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop2')
     # network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu2')
     # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
-    net =  tf.layers.dropout(model_input,rate=0.2)
-    net = tf.layers.dense(net, 1024, activation = tf.nn.relu, name='relu1')
-    net =  tf.layers.dropout(net,rate=0.5)
-    net = tf.layers.dense(net, 1024, activation = tf.nn.relu, name='relu2')
-    net =  tf.layers.dropout(net,rate=0.5)
+    input_layer = slim.fully_connected(model_input, 8000, activation_fn=tf.nn.relu)
+    hidden_layer = slim.fully_connected(input_layer, 5000, activation_fn=tf.nn.relu)
+    # output = slim.fully_connected(hidden_layer, vocab_size, activation_fn=tf.nn.softmax)
 
     output = slim.fully_connected(
-    net, vocab_size, activation_fn=tf.nn.sigmoid,
+    hidden_layer, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
 
     return {"predictions": output}
