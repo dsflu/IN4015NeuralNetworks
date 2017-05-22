@@ -131,12 +131,13 @@ class MLPModeltest(models.BaseModel):
     # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop2')
     # network = tl.layers.DenseLayer(network, n_units=1024, act = tf.nn.relu, name='relu2')
     # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
-    input_layer = slim.fully_connected(model_input, 8000, activation_fn=tf.nn.relu)
-    hidden_layer = slim.fully_connected(input_layer, 5000, activation_fn=tf.nn.relu)
+    input_layer = slim.fully_connected(model_input, 4000, activation_fn=tf.nn.relu)
+    hidden_layer1 = slim.fully_connected(input_layer, 8000, activation_fn=tf.nn.relu)
+    hidden_layer2 = slim.fully_connected(hidden_layer1 5000, activation_fn=tf.nn.relu)
     # output = slim.fully_connected(hidden_layer, vocab_size, activation_fn=tf.nn.softmax)
 
     output = slim.fully_connected(
-    hidden_layer, vocab_size, activation_fn=tf.nn.sigmoid,
+    hidden_layer2, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
 
     return {"predictions": output}
