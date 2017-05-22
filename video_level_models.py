@@ -133,7 +133,7 @@ class MLPModeltest(models.BaseModel):
     # network = tl.layers.DropoutLayer(network, keep=0.5, name='drop3')
     input_layer = slim.fully_connected(model_input, 4000, activation_fn=tf.nn.relu)
     hidden_layer1 = slim.fully_connected(input_layer, 8000, activation_fn=tf.nn.relu)
-    hidden_layer2 = slim.fully_connected(hidden_layer1,5000, activation_fn=tf.nn.relu)
+    hidden_layer2 = slim.fully_connected(hidden_layer1, 5000, activation_fn=tf.nn.relu)
     # output = slim.fully_connected(hidden_layer, vocab_size, activation_fn=tf.nn.softmax)
 
     output = slim.fully_connected(
