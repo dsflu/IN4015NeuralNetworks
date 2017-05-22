@@ -135,9 +135,11 @@ class MLPModeltest(models.BaseModel):
     hidden_layer1 = slim.fully_connected(input_layer, 8000, activation_fn=tf.nn.relu)
     hidden_layer2 = slim.fully_connected(hidden_layer1, 5000, activation_fn=tf.nn.relu)
     # output = slim.fully_connected(hidden_layer, vocab_size, activation_fn=tf.nn.softmax)
+    dropout = tf.layers.dropout(
+      inputs=hidden_layer2, rate=0.4)
 
     output = slim.fully_connected(
-    hidden_layer2, vocab_size, activation_fn=tf.nn.sigmoid,
+    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
     weights_regularizer=slim.l2_regularizer(0.01))
 
     return {"predictions": output}
