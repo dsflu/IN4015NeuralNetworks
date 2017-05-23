@@ -251,7 +251,7 @@ def build_graph(reader,
 
 
   ############# Modify labels ###############
-  parameters = pickle.load( open( "IN4015NeuralNetworks/autoencoderParametersNoise07.p", "rb" ) )
+  parameters = pickle.load( open( "autoencoderParametersNoise07.p", "rb" ) )
   Wh = tf.constant(parameters[0])
   bh = tf.constant(parameters[1])
   bo = tf.constant(parameters[2])
