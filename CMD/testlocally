@@ -1,10 +1,9 @@
 gcloud ml-engine local train \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train -- \
 --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' \
---feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --train_dir=/tmp/yt8m_train --model=LogisticModel --start_new_model
 
-
+--feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 
 
 MODEL_DIR=/tmp/yt8m
@@ -22,9 +21,8 @@ submit training $JOB_NAME \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
---feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --model=LogisticModel \
---train_dir=$BUCKET_NAME/Logistic_Auto_0.7
+--train_dir=$BUCKET_NAME/Logistic_Auto_4
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 

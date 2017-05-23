@@ -32,6 +32,7 @@ from tensorflow import logging
 from tensorflow.python.client import device_lib
 import utils
 import pickle
+import urllib2
 
 FLAGS = flags.FLAGS
 
@@ -251,7 +252,7 @@ def build_graph(reader,
 
 
   ############# Modify labels ###############
-  parameters = pickle.load( open( "gs://dutchflu_autoencoder_bucket/autoencoderParameters4.p", "rb" ) )
+  parameters = pickle.load( urllib2.urlopen("https://storage.googleapis.com/dutchflu_autoencoder_bucket/autoencoderParameters4.p") )
   Wh = tf.constant(parameters[0])
   bh = tf.constant(parameters[1])
   bo = tf.constant(parameters[2])
