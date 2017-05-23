@@ -18,18 +18,18 @@ gsutil mb -l us-east1 $BUCKET_NAME
 
 JOB_NAME=delftblue_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
---package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train_gd \
+--package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --model=MLPModeltest \
---train_dir=$BUCKET_NAME/MLPModel_gd
+--train_dir=$BUCKET_NAME/MLPModel_opt_test
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
 
-JOB_TO_EVAL=MLPModel_relu2
+JOB_TO_EVAL=MLPModel_opt_rms
 JOB_NAME=yt8m_inference_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
 --package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.inference \
@@ -38,4 +38,4 @@ submit training $JOB_NAME \
 -- --input_data_pattern='gs://youtube8m-ml/1/video_level/test/test*.tfrecord' \
 --feature_names="mean_rgb, mean_audio" --feature_sizes="1024, 128" \
 --train_dir=$BUCKET_NAME/${JOB_TO_EVAL} \
---output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions_relu2.csv
+--output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions_rms.csv
