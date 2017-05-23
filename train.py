@@ -434,7 +434,7 @@ class Trainer(object):
 
           if self.max_steps and self.max_steps <= global_step_val:
             self.max_steps_reached = True
-          print(labels.eval(session=sess))
+          # print(labels.eval(session=sess))
 
           if self.is_master and global_step_val % 10 == 0 and self.train_dir:
             eval_start_time = time.time()
