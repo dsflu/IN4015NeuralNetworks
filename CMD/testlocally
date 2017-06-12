@@ -10,19 +10,19 @@ MODEL_DIR=/tmp/yt8m
 python train.py --train_data_pattern='/Users/fredlu/Developer/IN4015NeuralNetworks/data/yt8m_video_level/train*.tfrecord' --model=LogisticModel --train_dir=$MODEL_DIR/mlp
 
 
-BUCKET_NAME=gs://${USER}_autoencoder_bucket
+BUCKET_NAME=gs://${USER}_delftblue_bucket
 
 BUCKET_NAME=gs://${USER}_mlp_bucket
 gsutil mb -l us-east1 $BUCKET_NAME
 
 JOB_NAME=delftblue_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ml-engine jobs \
 submit training $JOB_NAME \
---package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train \
+--package-path=IN4015NeuralNetworks --module-name=IN4015NeuralNetworks.train_m \
 --staging-bucket=$BUCKET_NAME --region=us-east1 \
 --config=IN4015NeuralNetworks/cloudml-gpu.yaml \
 -- --train_data_pattern='gs://youtube8m-ml-us-east1/1/video_level/train/train*.tfrecord' \
---model=LogisticModel \
---train_dir=$BUCKET_NAME/Logistic_Autoencoder_4
+--model=MLPModel2_3 \
+--train_dir=$BUCKET_NAME/dropout3
 
 tensorboard --logdir=$BUCKET_NAME --port=8080
 
