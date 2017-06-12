@@ -104,6 +104,51 @@ class MoeModel(models.BaseModel):
                                      [-1, vocab_size])
     return {"predictions": final_probabilities}
 
+class MLPModel2_3(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+      
+    net = slim.fully_connected(model_input,512)
+    net = slim.fully_connected(net,4096)
+    dropout = tf.layers.dropout(
+      inputs=net, rate=0.3)
+
+    output = slim.fully_connected(
+    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
+    return {"predictions": output}
+
+class MLPModel2_6(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+      
+    net = slim.fully_connected(model_input,512)
+    net = slim.fully_connected(net,4096)
+    dropout = tf.layers.dropout(
+      inputs=net, rate=0.6)
+
+    output = slim.fully_connected(
+    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
+    return {"predictions": output}
+
+class MLPModel2_8(models.BaseModel):
+
+  def create_model(self, model_input, vocab_size, **unused_params):
+      
+    net = slim.fully_connected(model_input,512)
+    net = slim.fully_connected(net,4096)
+    dropout = tf.layers.dropout(
+      inputs=net, rate=0.8)
+
+    output = slim.fully_connected(
+    dropout, vocab_size, activation_fn=tf.nn.sigmoid,
+    weights_regularizer=slim.l2_regularizer(0.01))
+
+    return {"predictions": output}
+
 
 class MLPModel3Layers(models.BaseModel):
 
